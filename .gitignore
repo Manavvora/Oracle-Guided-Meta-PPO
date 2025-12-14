@@ -48,12 +48,15 @@ checkpoint
 # Output/Results
 # ===================
 # Generated plots and figures
-*.png
 *.jpg
 *.jpeg
 *.gif
 *.svg
 *.pdf
+
+# Ignore all PNGs except specific ones for README
+*.png
+!assets/*.png
 
 # TensorBoard logs
 tb_logs/

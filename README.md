@@ -1,101 +1,179 @@
-# Oracle-Guided Meta-PPO
+<div align="center">
 
-A scalable two-stage reinforcement learning framework for multi-agent budget-constrained decision making under partial observability.
+# 🎯 Oracle-Guided Meta-PPO
 
-## Overview
+**A Scalable Two-Stage Reinforcement Learning Framework for Multi-Agent Budget-Constrained POMDPs**
 
-Oracle-Guided Meta-PPO is a novel approach that addresses the challenge of training reinforcement learning policies for large-scale multi-agent systems with budget constraints and partial observability (POMDPs). The key insight is to leverage computationally tractable oracle policies (computed via value iteration on a surrogate MDP) to guide the training of a meta-policy that generalizes across diverse agent configurations.
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
+[![Stable-Baselines3](https://img.shields.io/badge/Stable--Baselines3-2.0+-green.svg)](https://stable-baselines3.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-### Key Contributions
+[Overview](#overview) •
+[Method](#method) •
+[Results](#results) •
+[Installation](#installation) •
+[Usage](#usage) •
+[Citation](#citation)
 
-1. **Two-Stage Framework**: Decomposes the problem into budget allocation and policy learning
-2. **Scalability**: Demonstrates computational efficiency scaling to 100,000+ agents
-3. **Generalization**: Meta-policy trained on a small subset of agents generalizes to unseen configurations
-4. **Oracle Guidance**: Uses MDP-based oracle policies to accelerate POMDP policy learning
+</div>
 
-## Method
+---
 
-The proposed approach consists of three main stages:
+## 🌟 Overview
+
+Oracle-Guided Meta-PPO addresses the challenge of training reinforcement learning policies for **large-scale multi-agent systems** with:
+- 📊 **Budget constraints** across all agents
+- 👁️ **Partial observability** (POMDP setting)
+- 🔄 **Heterogeneous agent dynamics**
+
+The key insight is to leverage computationally tractable **oracle policies** (computed via value iteration on a surrogate MDP) to guide the training of a **meta-policy** that generalizes across diverse agent configurations.
+
+### ✨ Key Features
+
+| Feature | Description |
+|---------|-------------|
+| 🚀 **Scalability** | Efficiently handles up to 1,000 heterogeneous agents |
+| 🎓 **Generalization** | Meta-policy trained on small subset generalizes to unseen configurations |
+| 🔮 **Oracle Guidance** | MDP-based oracles accelerate POMDP policy learning |
+| ⚡ **Two-Stage Design** | Decouples budget allocation from policy learning |
+
+---
+
+## 📈 Results
+
+### Performance Comparison
+
+Our Oracle-Guided Meta-PPO achieves near-oracle performance while operating under partial observability:
+
+<div align="center">
+<img src="assets/mult_metrics_all.png" alt="Performance Metrics Comparison" width="100%"/>
+</div>
+
+*Comparison across three metrics: (a) Maximum lifetime achieved, (b) Number of repair actions, (c) Total cost incurred. Oracle-Guided Meta-PPO (orange) closely tracks the oracle policy (blue dashed) and significantly outperforms Vanilla Meta-PPO (red) and rule-based baselines (green).*
+
+### Budget Allocation via Random Forest
+
+The Random Forest regressor accurately predicts optimal budget allocation parameters:
+
+<div align="center">
+<img src="assets/rf_vs_nlls.png" alt="Random Forest vs NLLS" width="60%"/>
+</div>
+
+*Random Forest predictions closely match ground-truth parameters obtained via non-linear least squares optimization.*
+
+### Computational Scalability
+
+The framework demonstrates practical scalability:
+
+<div align="center">
+<img src="assets/computational_complexity_total.png" alt="Computational Complexity" width="60%"/>
+</div>
+
+*Total computation time vs. number of components (log scale). The algorithm efficiently scales to 1,000 agents.*
+
+---
+
+## 🔬 Method
+
+The proposed approach consists of **three main stages**:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ORACLE-GUIDED META-PPO PIPELINE                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────────┐  │
+│  │   STAGE 1    │    │   STAGE 2    │    │       STAGE 3        │  │
+│  │              │    │              │    │                      │  │
+│  │   Random     │───▶│    Oracle    │───▶│  Oracle-Guided       │  │
+│  │   Forest     │    │    Policy    │    │  Meta-PPO Training   │  │
+│  │   Budget     │    │  Generation  │    │                      │  │
+│  │   Split      │    │  (Value      │    │  Agent chooses:      │  │
+│  │              │    │  Iteration)  │    │  • Follow oracle     │  │
+│  │              │    │              │    │  • Inspect (reduce   │  │
+│  │              │    │              │    │    uncertainty)      │  │
+│  └──────────────┘    └──────────────┘    └──────────────────────┘  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ### Stage 1: Budget Allocation via Random Forest
-A Random Forest regressor learns to predict optimal per-agent budget allocations based on agent-specific features (degradation dynamics, costs, etc.). The model is trained on data generated from solving individual agent optimization problems.
+A Random Forest regressor learns to predict optimal per-agent budget allocations based on agent-specific features (degradation dynamics, costs, etc.).
 
 ### Stage 2: Oracle Policy Generation
-For each agent-budget pair, an oracle policy is computed via value iteration on a surrogate MDP. This oracle provides guidance on when to take maintenance/recapitalization actions given full state observability.
+For each agent-budget pair, an oracle policy is computed via **value iteration** on a surrogate MDP with full state observability.
 
 ### Stage 3: Oracle-Guided Meta-PPO Training
-A PPO-based meta-policy is trained across multiple agent configurations. The key innovation is that the agent chooses between:
+A PPO-based meta-policy is trained with a hierarchical action space:
 - **Action 0**: Follow the oracle policy's recommendation
 - **Action 1**: Take an inspection action to reduce uncertainty
 
-This hierarchical action space allows the learned policy to focus on the core challenge of POMDPs: deciding when to gather information.
+This design allows the policy to focus on the core POMDP challenge: *when to gather information*.
 
-## Repository Structure
+---
+
+## 🗂️ Repository Structure
 
 ```
 Oracle-Guided-Meta-PPO/
-├── infra_env/                          # Infrastructure Management Scenario
-│   ├── env/                            # Environment definitions
-│   │   ├── component_mdp_repair.py     # MDP formulation for components
-│   │   ├── component_pomdp_repair.py   # POMDP formulation with belief tracking
-│   │   ├── meta_ppo_env.py             # Meta-PPO environment wrapper
-│   │   └── baseline_env.py             # Baseline environment
-│   └── pomdp_solver/                   # Main algorithms
-│       ├── random_forest.py            # RF model for budget prediction
-│       ├── random_forest_budget_split.py   # Budget allocation via RF
-│       ├── generate_oracle_policies.py     # Value iteration oracle generation
-│       ├── oracle_guided_meta_ppo_train.py # Oracle-Guided Meta-PPO training
-│       ├── oracle_guided_meta_ppo_test.py  # Oracle-Guided Meta-PPO testing
-│       ├── oracle_guided_meta_ppo_optimal_budget_split.py  # Full pipeline
-│       ├── vanilla_meta_ppo_train.py   # Baseline: Vanilla Meta-PPO
-│       ├── vanilla_meta_ppo_test.py    # Baseline: Vanilla Meta-PPO testing
-│       ├── realistic_baseline.py       # Baseline: Rule-based policy
-│       ├── oracle_policy_test.py       # Baseline: Oracle-only policy
-│       └── time_complexity.py          # Scalability experiments
 │
-├── etf_env/                            # ETF Risk Capital Management Scenario
-│   ├── env/                            # Environment definitions
-│   │   ├── etf_env.py                  # Multi-asset ETF environment
-│   │   └── sub_etf_env.py              # Sub-environment definitions
-│   ├── models/                         # Machine learning models
-│   │   ├── random_forest.py            # Budget split model
-│   │   └── random_forest_budget_split.py
-│   ├── etf_oracle_guided_meta_ppo.py   # Oracle-Guided Meta-PPO for ETF
-│   ├── etf_oracle_policy.py            # Oracle policy generation
-│   ├── oracle_guided_meta_ppo_train_refactored.py
-│   ├── oracle_guided_meta_ppo_test_refactored.py
-│   ├── vanilla_meta_ppo_train.py       # Baseline comparison
-│   ├── vanilla_meta_ppo_test.py
-│   ├── generate_sp500_data.py          # Data generation utilities
-│   └── baselinefin.py                  # Financial baseline configuration
+├── 📁 infra_env/                      # Infrastructure Management Scenario
+│   ├── 📁 env/                        # Environment definitions
+│   │   ├── component_mdp_repair.py    # MDP formulation
+│   │   ├── component_pomdp_repair.py  # POMDP with belief tracking
+│   │   ├── meta_ppo_env.py            # Meta-PPO environment wrapper
+│   │   └── baseline_env.py            # Baseline environment
+│   │
+│   └── 📁 pomdp_solver/               # Core algorithms
+│       ├── random_forest.py           # RF model training
+│       ├── random_forest_budget_split.py
+│       ├── generate_oracle_policies.py
+│       ├── oracle_guided_meta_ppo_train.py
+│       ├── oracle_guided_meta_ppo_test.py
+│       ├── vanilla_meta_ppo_*.py      # Baseline
+│       ├── realistic_baseline.py      # Rule-based baseline
+│       └── time_complexity.py         # Scalability experiments
 │
-├── requirements.txt                    # Python dependencies
-├── .gitignore                          # Git ignore rules
-└── README.md                           # This file
+├── 📁 etf_env/                        # ETF Risk Capital Management
+│   ├── 📁 env/                        # Environment definitions
+│   ├── 📁 models/                     # ML models
+│   ├── etf_oracle_guided_meta_ppo.py
+│   └── ...
+│
+├── 📁 assets/                         # Images for README
+├── 📄 requirements.txt
+├── 📄 .gitignore
+└── 📄 README.md
 ```
 
-## Installation
+---
+
+## 🚀 Installation
 
 ### Prerequisites
 - Python 3.8+
-- pip
+- pip or conda
 
-### Setup
+### Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Oracle-Guided-Meta-PPO.git
+git clone https://github.com/Manavvora/Oracle-Guided-Meta-PPO.git
 cd Oracle-Guided-Meta-PPO
 
-# Create a virtual environment (recommended)
+# Create virtual environment (recommended)
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
+---
+
+## 💻 Usage
 
 ### Infrastructure Management Scenario
 
@@ -105,7 +183,7 @@ cd infra_env/pomdp_solver
 # Step 1: Train Random Forest for budget prediction
 python random_forest.py
 
-# Step 2: Compute budget split for components
+# Step 2: Compute budget split
 python random_forest_budget_split.py --num_components 1000
 
 # Step 3: Generate oracle policies
@@ -114,69 +192,99 @@ python generate_oracle_policies_optimal_budget_split.py --num_components 1000
 # Step 4: Train Oracle-Guided Meta-PPO
 python oracle_guided_meta_ppo_train.py
 
-# Step 5: Test the trained model
+# Step 5: Evaluate
 python oracle_guided_meta_ppo_optimal_budget_split.py --num_components 1000
 ```
 
-### ETF Risk Capital Management Scenario
+### ETF Risk Capital Management
 
 ```bash
 cd etf_env
 
-# Train Oracle-Guided Meta-PPO
+# Train
 python etf_oracle_guided_meta_ppo.py --timesteps 100000
 
-# Test the model
+# Test
 python oracle_guided_ppo_test.py
 ```
 
-### Time Complexity Analysis
+### Run Scalability Experiments
 
 ```bash
 cd infra_env/pomdp_solver
-
-# Run scalability experiments
 python time_complexity.py
 ```
 
-## Experiments
+---
+
+## 📊 Experiments
 
 ### Baselines
 
-The following baselines are implemented for comparison:
+| Method | Description |
+|--------|-------------|
+| **Oracle Policy** | Upper bound - MDP policy with full observability |
+| **Vanilla Meta-PPO** | Standard meta-PPO without oracle guidance |
+| **Realistic Baseline** | Rule-based inspection/replacement policy |
+| **Equal Budget Split** | Uniform budget allocation |
 
-1. **Vanilla Meta-PPO**: Standard meta-PPO without oracle guidance
-2. **Oracle Policy**: Directly applying the MDP oracle policy to the POMDP
-3. **Realistic Baseline**: Rule-based inspection and replacement policy
-4. **Equal Budget Split**: Uniform budget allocation across agents
+### Evaluation Metrics
 
-### Metrics
+- **Time-to-Failure (TTF)**: Average operational lifetime
+- **Total Cost Incurred**: Cumulative maintenance costs  
+- **Action Distribution**: Frequency of inspect/replace/no-action
 
-- **Time-to-Failure (TTF)**: Average operational lifetime of components/portfolios
-- **Cost Incurred**: Total maintenance/action costs
-- **Action Distribution**: Frequency of inspect/replace/no-action decisions
+---
 
-## Application Domains
+## 🌐 Application Domains
 
-### 1. Infrastructure Management
-- **Problem**: Managing degradation of infrastructure components (bridges, roads, machinery)
-- **State**: Component health (partially observable) and budget consumed
-- **Actions**: No action, Inspect (reveals true health), Replace (restores health)
-- **Objective**: Maximize component lifetime while staying within budget
+### 🏗️ Infrastructure Management
+| Aspect | Details |
+|--------|---------|
+| **Problem** | Managing degradation of infrastructure components |
+| **State** | Component health (partially observable) + budget consumed |
+| **Actions** | No-op, Inspect, Replace |
+| **Objective** | Maximize lifetime within budget |
 
-### 2. ETF Risk Capital Management
-- **Problem**: Managing risk capital across multiple financial assets
-- **State**: Asset prices (observable) and risk capital levels (partially observable)
-- **Actions**: No action, Inspect (reveals risk capital), Recapitalize (restores capital)
-- **Objective**: Maximize portfolio survival while managing action budget
+### 📈 ETF Risk Capital Management
+| Aspect | Details |
+|--------|---------|
+| **Problem** | Managing risk capital across financial assets |
+| **State** | Asset prices (observable) + risk levels (partial) |
+| **Actions** | No-op, Inspect, Recapitalize |
+| **Objective** | Maximize portfolio survival |
 
-## License
+---
+
+## 📦 Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `stable-baselines3` | PPO implementation |
+| `gymnasium` | RL environment interface |
+| `scikit-learn` | Random Forest model |
+| `cvxpy` | Convex optimization |
+| `numpy`, `pandas` | Data manipulation |
+| `matplotlib`, `seaborn` | Visualization |
+
+---
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+---
+
+## 🙏 Acknowledgments
 
 This work builds upon:
 - [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3) for RL algorithms
 - [Gymnasium](https://gymnasium.farama.org/) for environment interfaces
 
+---
+
+<div align="center">
+
+**⭐ If you find this work useful, please consider giving it a star! ⭐**
+
+</div>
