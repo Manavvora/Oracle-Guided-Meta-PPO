@@ -4,20 +4,29 @@
 
 **A Scalable Two-Stage Reinforcement Learning Framework for Multi-Agent Budget-Constrained POMDPs**
 
+[![arXiv](https://img.shields.io/badge/arXiv-2408.07192-b31b1b.svg)](https://arxiv.org/abs/2408.07192)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![Stable-Baselines3](https://img.shields.io/badge/Stable--Baselines3-2.0+-green.svg)](https://stable-baselines3.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-[Overview](#overview) •
-[Method](#method) •
-[Results](#results) •
-[Installation](#installation) •
-[Usage](#usage) •
-[Citation](#citation)
+**[[Paper]](https://arxiv.org/abs/2408.07192)** · **[[PDF]](https://arxiv.org/pdf/2408.07192)**
 
 </div>
+
+---
+
+## Table of Contents
+
+- [Overview](#-overview)
+- [Method](#-method)
+- [Results](#-results)
+- [Repository Structure](#-repository-structure)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Experiments](#-experiments)
+- [Application Domains](#-application-domains)
+- [Citation](#-citation)
 
 ---
 
@@ -38,6 +47,31 @@ The key insight is to leverage computationally tractable **oracle policies** (co
 | 🎓 **Generalization** | Meta-policy trained on small subset generalizes to unseen configurations |
 | 🔮 **Oracle Guidance** | MDP-based oracles accelerate POMDP policy learning |
 | ⚡ **Two-Stage Design** | Decouples budget allocation from policy learning |
+
+---
+
+## 🔬 Method
+
+The proposed approach consists of **three main stages**:
+
+<div align="center">
+<img src="assets/tmlr_arch.png" alt="Architecture Overview" width="90%"/>
+</div>
+
+*Overview of the Oracle-Guided Meta-PPO pipeline: (1) Random Forest predicts optimal budget allocation, (2) Value iteration generates oracle policies for each agent-budget pair, (3) Meta-PPO learns when to follow the oracle vs. gather information.*
+
+### Stage 1: Budget Allocation via Random Forest
+A Random Forest regressor learns to predict optimal per-agent budget allocations based on agent-specific features (degradation dynamics, costs, etc.).
+
+### Stage 2: Oracle Policy Generation
+For each agent-budget pair, an oracle policy is computed via **value iteration** on a surrogate MDP with full state observability.
+
+### Stage 3: Oracle-Guided Meta-PPO Training
+A PPO-based meta-policy is trained with a hierarchical action space:
+- **Action 0**: Follow the oracle policy's recommendation
+- **Action 1**: Take an inspection action to reduce uncertainty
+
+This design allows the policy to focus on the core POMDP challenge: *when to gather information*.
 
 ---
 
@@ -68,49 +102,10 @@ The Random Forest regressor accurately predicts optimal budget allocation parame
 The framework demonstrates practical scalability:
 
 <div align="center">
-<img src="assets/computational_complexity_total.png" alt="Computational Complexity" width="60%"/>
+<img src="assets/computational_complexity_total_log.png" alt="Computational Complexity" width="60%"/>
 </div>
 
-*Total computation time vs. number of components (log scale). The algorithm efficiently scales to 1,000 agents.*
-
----
-
-## 🔬 Method
-
-The proposed approach consists of **three main stages**:
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    ORACLE-GUIDED META-PPO PIPELINE                  │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────────┐  │
-│  │   STAGE 1    │    │   STAGE 2    │    │       STAGE 3        │  │
-│  │              │    │              │    │                      │  │
-│  │   Random     │───▶│    Oracle    │───▶│  Oracle-Guided       │  │
-│  │   Forest     │    │    Policy    │    │  Meta-PPO Training   │  │
-│  │   Budget     │    │  Generation  │    │                      │  │
-│  │   Split      │    │  (Value      │    │  Agent chooses:      │  │
-│  │              │    │  Iteration)  │    │  • Follow oracle     │  │
-│  │              │    │              │    │  • Inspect (reduce   │  │
-│  │              │    │              │    │    uncertainty)      │  │
-│  └──────────────┘    └──────────────┘    └──────────────────────┘  │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Stage 1: Budget Allocation via Random Forest
-A Random Forest regressor learns to predict optimal per-agent budget allocations based on agent-specific features (degradation dynamics, costs, etc.).
-
-### Stage 2: Oracle Policy Generation
-For each agent-budget pair, an oracle policy is computed via **value iteration** on a surrogate MDP with full state observability.
-
-### Stage 3: Oracle-Guided Meta-PPO Training
-A PPO-based meta-policy is trained with a hierarchical action space:
-- **Action 0**: Follow the oracle policy's recommendation
-- **Action 1**: Take an inspection action to reduce uncertainty
-
-This design allows the policy to focus on the core POMDP challenge: *when to gather information*.
+*Total computation time vs. number of components (log-log scale). The algorithm efficiently scales to 1,000 agents.*
 
 ---
 
@@ -266,6 +261,21 @@ python time_complexity.py
 | `cvxpy` | Convex optimization |
 | `numpy`, `pandas` | Data manipulation |
 | `matplotlib`, `seaborn` | Visualization |
+
+---
+
+## 📄 Citation
+
+If you find this work useful, please cite our paper:
+
+```bibtex
+@article{vora2024solving,
+  title={Solving truly massive budgeted monotonic pomdps with oracle-guided meta-reinforcement learning},
+  author={Vora, Manav and Liang, Jonas and Grussing, Michael N and Ornik, Melkior},
+  journal={arXiv preprint arXiv:2408.07192},
+  year={2024}
+}
+```
 
 ---
 
