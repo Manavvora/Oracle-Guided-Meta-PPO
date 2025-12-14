@@ -114,33 +114,49 @@ The framework demonstrates practical scalability:
 ```
 Oracle-Guided-Meta-PPO/
 │
-├── 📁 infra_env/                      # Infrastructure Management Scenario
-│   ├── 📁 env/                        # Environment definitions
-│   │   ├── component_mdp_repair.py    # MDP formulation
-│   │   ├── component_pomdp_repair.py  # POMDP with belief tracking
-│   │   ├── meta_ppo_env.py            # Meta-PPO environment wrapper
-│   │   └── baseline_env.py            # Baseline environment
+├── 📁 infra_env/                          # Infrastructure Management Scenario
+│   ├── 📁 env/                            # Environment definitions
+│   │   ├── component_mdp_repair.py        # MDP formulation for components
+│   │   ├── component_pomdp_repair.py      # POMDP formulation with belief tracking
+│   │   ├── meta_ppo_env.py                # Meta-PPO environment wrapper
+│   │   └── baseline_env.py                # Baseline environment
 │   │
-│   └── 📁 pomdp_solver/               # Core algorithms
-│       ├── random_forest.py           # RF model training
-│       ├── random_forest_budget_split.py
-│       ├── generate_oracle_policies.py
-│       ├── oracle_guided_meta_ppo_train.py
-│       ├── oracle_guided_meta_ppo_test.py
-│       ├── vanilla_meta_ppo_*.py      # Baseline
-│       ├── realistic_baseline.py      # Rule-based baseline
-│       └── time_complexity.py         # Scalability experiments
+│   └── 📁 pomdp_solver/                   # Core algorithms
+│       ├── random_forest.py               # RF model training
+│       ├── random_forest_budget_split.py  # Budget allocation via RF
+│       ├── generate_oracle_policies.py    # Value iteration oracle generation
+│       ├── oracle_guided_meta_ppo_train.py    # Oracle-Guided Meta-PPO training
+│       ├── oracle_guided_meta_ppo_test.py     # Oracle-Guided Meta-PPO testing
+│       ├── oracle_guided_meta_ppo_optimal_budget_split.py  # Full pipeline
+│       ├── vanilla_meta_ppo_train.py      # Baseline: Vanilla Meta-PPO
+│       ├── vanilla_meta_ppo_test.py       # Baseline: Vanilla Meta-PPO testing
+│       ├── realistic_baseline.py          # Baseline: Rule-based policy
+│       ├── oracle_policy_test.py          # Baseline: Oracle-only policy
+│       └── time_complexity.py             # Scalability experiments
 │
-├── 📁 etf_env/                        # ETF Risk Capital Management
-│   ├── 📁 env/                        # Environment definitions
-│   ├── 📁 models/                     # ML models
-│   ├── etf_oracle_guided_meta_ppo.py
-│   └── ...
+├── 📁 etf_env/                            # ETF Risk Capital Management Scenario
+│   ├── 📁 env/                            # Environment definitions
+│   │   ├── etf_env.py                     # Multi-asset ETF environment
+│   │   └── sub_etf_env.py                 # Sub-environment definitions
+│   │
+│   ├── 📁 models/                         # Machine learning models
+│   │   ├── random_forest.py               # Budget split model
+│   │   └── random_forest_budget_split.py  # RF training for budget allocation
+│   │
+│   ├── etf_oracle_guided_meta_ppo.py      # Oracle-Guided Meta-PPO for ETF
+│   ├── etf_oracle_policy.py               # Oracle policy generation
+│   ├── oracle_guided_meta_ppo_train_refactored.py
+│   ├── oracle_guided_meta_ppo_test_refactored.py
+│   ├── vanilla_meta_ppo_train.py          # Baseline comparison
+│   ├── vanilla_meta_ppo_test.py
+│   ├── generate_sp500_data.py             # Data generation utilities
+│   ├── generate_oracle_policy.py          # Oracle generation
+│   └── baselinefin.py                     # Financial baseline configuration
 │
-├── 📁 assets/                         # Images for README
-├── 📄 requirements.txt
-├── 📄 .gitignore
-└── 📄 README.md
+├── 📁 assets/                             # Images for README
+├── 📄 requirements.txt                    # Python dependencies
+├── 📄 .gitignore                          # Git ignore rules
+└── 📄 README.md                           # This file
 ```
 
 ---
@@ -248,19 +264,6 @@ python time_complexity.py
 | **State** | Asset prices (observable) + risk levels (partial) |
 | **Actions** | No-op, Inspect, Recapitalize |
 | **Objective** | Maximize portfolio survival |
-
----
-
-## 📦 Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `stable-baselines3` | PPO implementation |
-| `gymnasium` | RL environment interface |
-| `scikit-learn` | Random Forest model |
-| `cvxpy` | Convex optimization |
-| `numpy`, `pandas` | Data manipulation |
-| `matplotlib`, `seaborn` | Visualization |
 
 ---
 
