@@ -106,11 +106,10 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv/
+# Virtual environments (only in root directory)
+/venv/
+/ENV/
+/.venv/
 
 # PyInstaller
 *.manifest

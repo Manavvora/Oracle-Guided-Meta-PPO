@@ -1,6 +1,6 @@
 # Oracle-Guided Meta-PPO
 
-A scalable two-stage reinforcement learning framework for multi-agent budget-constrained decision making under partial observability. This repository contains the implementation for our paper currently under review at TMLR.
+A scalable two-stage reinforcement learning framework for multi-agent budget-constrained decision making under partial observability.
 
 ## Overview
 
