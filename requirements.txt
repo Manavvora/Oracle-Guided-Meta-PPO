@@ -1,0 +1,36 @@
+# Oracle-Guided Meta-PPO Dependencies
+# =====================================
+# Install with: pip install -r requirements.txt
+
+# Core RL Framework
+stable-baselines3>=2.0.0
+gymnasium>=0.29.0
+
+# Scientific Computing
+numpy>=1.24.0
+scipy>=1.10.0
+pandas>=2.0.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Optimization
+cvxpy>=1.4.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Data Storage
+h5py>=3.9.0
+
+# Utilities
+tqdm>=4.65.0
+
+# PyTorch (required by stable-baselines3)
+# Note: Install appropriate version for your CUDA setup
+# CPU only:
+torch>=2.0.0
+# For CUDA, use: pip install torch --index-url https://download.pytorch.org/whl/cu118
+
